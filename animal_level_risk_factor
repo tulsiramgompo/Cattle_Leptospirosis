@@ -1,0 +1,377 @@
+# Animal Level risk factors for the leptospirosis
+
+## correltion test
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(dplyr)
+library(ggplot2)
+library(car)
+## Making the cut off for bivariate analaysis
+
+# Checking correlation
+data(cattle_study)
+cattle_cor_1<-cor(cattle_study$age_in_years, cattle_study$herd_size, use = "complete.obs")
+cattle_cor_1
+
+cattle_cor_2<-cor(cattle_study$age_in_years, cattle_study$parity, use = "complete.obs") # highly correlated
+cattle_cor_2
+
+cattle_cor_3<-cor(cattle_study$herd_size, cattle_study$parity, use = "complete.obs")
+cattle_cor_3
+
+cattle_cor_4<-cor(cattle_study$common_grazing_ground_codes,cattle_study$grazing_in_community_dog_access_codes,use="complete.obs") # highly correlated
+cattle_cor_4
+
+cattle_cor_5<-cor(cattle_study$BCS, cattle_study$age_in_years,use="complete.obs")
+cattle_cor_5
+
+
+## Animal Information First part
+table(cattle_study$municipality_rural_municipality)
+table(cattle_study$municipality_rural_municipality, cattle_study$leptospirosis)
+
+## Age
+table(is.na(cattle_study$age_in_years))
+median (cattle_study$age_in_years,na.rm = TRUE)
+mean(cattle_study$age_in_years,na.rm = TRUE)
+range(cattle_study$age_in_years,na.rm = TRUE)
+
+
+
+# Age distributions
+
+hist_lepto<-ggplot(cattle_study,aes (x=age_in_years )) +
+geom_histogram (bins= 17, size= 2, fill= "lightblue", color= "black")+
+xlab("Age in years") + ylab("No of cattle") + xlim (c(0,16))+
+ggtitle("The age distributions of cattle sampled for the study")+
+  theme(text = element_text(size=15))+
+  theme_classic()
+hist_lepto
+
+## Age category (below or above median is cut-off)
+
+table(cattle_study$age_cat)
+table(cattle_study$age_cat, cattle_study$leptospirosis)
+
+
+## Sex
+table(cattle_study$sex_cat)
+table(cattle_study$sex_cat, cattle_study$leptospirosis)
+
+
+## Breed
+table(cattle_study$breed)
+table(cattle_study$breed,cattle_study$leptospirosis)
+## Univarible
+cattle_study$breed<-as.factor(cattle_study$breed)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+
+breed_1<- glm (leptospirosis ~ breed,  data= cattle_study, family= binomial(link="logit"))
+summary(breed_1)
+Anova(breed_1)
+exp(coef(breed_1))
+exp(confint(breed_1))
+
+## Herd size
+median(cattle_study$herd_size,na.rm = TRUE)
+mean(cattle_study$herd_size,na.rm = TRUE)
+summary(cattle_study$herd_size)
+table(cattle_study$herd_cat)
+table(cattle_study$herd_cat, cattle_study$leptospirosis)
+
+
+# Univariable
+cattle_study$herd_cat<-as.factor(cattle_study$herd_cat)
+herd_size_1<- glm (leptospirosis ~ herd_cat,  data= cattle_study, family= binomial(link="logit"))
+summary(herd_size_1)
+Anova(herd_size_1)
+exp(coef(herd_size_1))
+exp(confint(herd_size_1))
+
+# herd origin
+table(cattle_study$cattle_origin)
+table(cattle_study$cattle_origin,cattle_study$leptospirosis)
+
+ # locations
+table(cattle_study$municipality_rural_municipality)
+
+
+## Check the total 16 rural muncipality and one is extra
+sites<-ggplot(cattle_study,aes(x=municipality_rural_municipality))+
+  geom_bar(fill="brown")+ 
+  xlab(" the name of muncipailties") +ylab("the number of herds from each munciplality")+
+  theme_tufte()
+sites 
+variable.names(cattle_study)
+table (cattle_study$cattle_origin)
+
+
+
+## Pregnancy status
+table(cattle_study$ pregnanancy_status)
+table(cattle_study$pregnanancy_status,cattle_study$leptospirosis) ## Not significant
+
+## Parity category
+table(cattle_study$parity_cat, cattle_study$leptospirosis) ##  very important
+
+# Univariable
+cattle_study$parity_cat<- as.factor(cattle_study$parity_cat)
+parity_cat_1<-glm (leptospirosis ~ parity_cat,  data=cattle_study, family= binomial(link="logit"))
+summary(parity_cat_1)
+exp(coef(parity_cat_1))
+exp(confint(parity_cat_1))
+
+# Pregnancy status # fliping table
+pregnancy_status <- matrix (c(2,12,56,291), ncol=2)
+colnames(pregnancy_status) <- c('positive', "negative")
+rownames(pregnancy_status) <- c('Yes', 'No')
+pregnancy.table <- as.table(pregnancy_status)
+pregnancy.table
+
+## individusl characteristics
+
+table(cattle_study$history_of_abortion_in_female,cattle_study$leptospirosis)
+table(cattle_study$history_of_abortion_in_female,cattle_study$toxoplasmosis) ## Conroversary to prior konowledge
+table(cattle_study$history_of_abortion_in_female) ## Conroversary to prior konowledge
+
+table(cattle_study$history_of_repeat_breeding,cattle_study$leptospirosis) ## Very important
+
+table(cattle_study$history_of_anestrous_in_female, cattle_study$leptospirosis) # Ntt significant
+
+table(cattle_study$lactation_period_E_M_L,cattle_study$leptospirosis)   #
+
+table(cattle_study$BCS_cat,cattle_study$leptospirosis) #
+
+# For animal level data
+table(cattle_study$pregnanancy_status_of_female,cattle_study$leptospirosis) ## pregnancy protective
+table(cattle_study$animals_contact_with_other_animals,cattle_study$leptospirosis) ## zero cells and ned Haldens correction
+
+## Hygine and Biosecurity
+table(cattle_study$ facility_of_excreta_disposal, cattle_study$leptospirosis) ##
+table(cattle_study$ presence_of_rat, cattle_study$leptospirosis)##
+table(cattle_study$tick_infestation, cattle_study$leptospirosis) ## Useful  but not significant
+
+table(cattle_study$ grazing_in_pasture_with_community_dog_access, cattle_study$leptospirosis) ## Very imporant
+
+ table(cattle_study$history_of_abortion_in_female, cattle_study$leptospirosis)## Controvercial
+
+## Animal Movements 
+ 
+table(cattle_study$contact_of_domestic_animal_with_wild, cattle_study$leptospirosis) ## Very Important
+table(cattle_study$common_grazing_ground, cattle_study$leptospirosis)## Very Important
+
+## Production Status
+table (cattle_study$average_daily_milk_production_in_litres, cattle_study$leptospirosis) ## Use this mean production in descriptive study
+
+
+## Owner knowledge
+table (cattle_study$do_owner_know_about_zoonosis, cattle_study$leptospirosis)
+table (cattle_study$any_history_of_fever_myalgia, cattle_study$leptospirosis)
+table (cattle_study$abortion_in_family_members, cattle_study$leptospirosis)
+table (cattle_study$information_about_leptospirosis, cattle_study$leptospirosis) ## Description
+table (cattle_study$information_about_brucellosis, cattle_study$brucellosis) ##
+table (cattle_study$information_about_hemoprotozoan, cattle_study$leptospirosis)## Description
+table (cattle_study$rodents_in_kitchen, cattle_study$leptospirosis) ##
+table (cattle_study$do_you_work_in_ricefield, cattle_study$leptospirosis) #
+table (cattle_study$work_with_bare_feet_in_rice_fields, cattle_study$leptospirosis) ##
+
+
+
+
+## Univariable Analysis
+# Sex # Not significant and check for confounding
+table(cattle_study$sex_cat_codes,cattle_study$leptospirosis)
+cattle_study$sex_cat_codes<-as.factor(cattle_study$sex_cat_codes)
+cattle_study$leptospirosis<-as.factor (cattle_study$leptospirosis)
+sex_1<- glm (leptospirosis ~ sex_cat_codes,  data= cattle_study, family= binomial(link="logit"))
+summary(sex_1)
+Anova(sex_1)
+exp(coef(sex_1))
+exp(confint(sex_1))
+
+
+#AGe  # Not sig and check for confounding
+median (cattle_study$age_in_years,na.rm = TRUE)
+table(is.na(cattle_study$age_in_years))
+table(cattle_study$age_cat, cattle_study$leptospirosis)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+cattle_study$age_cat<-as.factor(cattle_study$age_cat)
+age_1<- glm (leptospirosis ~ age_cat,  data= cattle_study, family= binomial(link="logit"))
+summary(age_1)
+Anova(age_1)
+exp(coef(age_1))
+exp(confint(age_1))
+
+## Body condition score # Not sig
+table(cattle_study$BCS_cat,cattle_study$leptospirosis) #
+cattle_study$BCS_cat<-as.factor(cattle_study$BCS_cat)
+cattle_study$BCS_cat<-relevel(cattle_study$BCS_cat, ref ="below_or_equal_3")
+BCS_1<- glm (leptospirosis ~ BCS_cat,  data= cattle_study, family= binomial(link="logit"))
+summary(BCS_1)
+Anova(BCS_1)
+exp(coef(BCS_1))
+exp(confint(BCS_1))
+
+# breed # Not sig but can be inluded in final model
+cattle_study$breed<-as.factor(cattle_study$breed)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+
+cattle_study$ breed <-relevel(cattle_study$ breed, ref = "holstein cross")
+
+breed_1<- glm (leptospirosis ~ breed,  data= cattle_study, family= binomial(link="logit"))
+summary(breed_1)
+Anova(breed_1)
+exp(coef(breed_1))
+exp(confint(breed_1)) ## Not included further 
+
+
+# parity # Not significant
+table(cattle_study$parity_cat, cattle_study$leptospirosis)
+table(cattle_study$parity_cat, cattle_study$toxoplasmosis)
+cattle_study$parity_cat<-as.factor(cattle_study$parity_cat)
+cattle_study$parity_cat <-relevel(cattle_study$ parity_cat, ref = "above_median")
+parity_1<- glm (leptospirosis ~ parity_cat,  data= cattle_study, na.action= na.exclude, family= binomial(link="logit"))
+summary(parity_1)
+Anova(parity_1)
+exp(coef(parity_1))
+exp(confint(parity_1))
+    
+    
+## pregnanancy_status_of_female"  # Protective and not include in fianl model
+cattle_study$pregnanancy_status_of_female<-as.factor(cattle_study$pregnanancy_status_of_female)
+pregnancy_status_1<- glm (leptospirosis ~ pregnanancy_status_of_female,  data= cattle_study, family= binomial(link="logit"))
+summary(pregnancy_status_1)
+Anova(pregnancy_status_1)
+exp(coef(pregnancy_status_1))
+exp(confint(pregnancy_status_1))
+
+## Repeat breeding in female
+table(cattle_study$history_of_repeat_breeding, cattle_study$leptospirosis) ## Very important
+cattle_study$history_of_repeat_breeding<-as.factor(cattle_study$history_of_repeat_breeding)
+repeat_breeding<- glm (leptospirosis ~ history_of_repeat_breeding,  data= cattle_study, family= binomial(link="logit"))
+summary(repeat_breeding)
+Anova(repeat_breeding)
+exp(coef(repeat_breeding))
+exp(confint(repeat_breeding))
+
+  ## History of aneoustrous # Not sig 
+table(cattle_study$history_of_anestrous_in_female,cattle_study$leptospirosis)
+cattle_study$history_of_anestrous_in_female<-as.factor(cattle_study$history_of_anestrous_in_female)
+anestrous_1<- glm (leptospirosis ~ history_of_anestrous_in_female,  data= cattle_study, family= binomial(link="logit"))
+summary(anestrous_1)
+Anova(anestrous_1)
+exp(coef(anestrous_1))
+exp(confint(anestrous_1))
+
+
+## Lactation period vs non-lactating # Include in fianl model
+table(cattle_study$lactation_vs_non_lactating,cattle_study$leptospirosis)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+cattle_study$lactation_vs_non_lactating<-as.factor(cattle_study$lactation_vs_non_lactating)
+cattle_study$lactation_vs_non_lactating<-relevel(cattle_study$lactation_vs_non_lactating, ref ="yes")
+lactation_1<- glm (leptospirosis ~ lactation_vs_non_lactating,  data= cattle_study,na.action = na.exclude, family= binomial(link="logit"))
+summary(lactation_1)
+Anova(lactation_1)
+exp(coef(lactation_1))
+exp(confint(lactation_1))
+
+
+
+# Tick infestation and not sig and not include in final model
+table(cattle_study$tick_infestation, cattle_study$leptospirosis)
+cattle_study$tick_infestation<-as.factor(cattle_study$tick_infestation)
+cattle_study$tick_infestation<-as.factor(cattle_study$tick_infestation)
+cattle_study$tick_infestation<-relevel(cattle_study$tick_infestation, ref ="no")
+tick_1<- glm (leptospirosis ~ tick_infestation,  data= cattle_study, family= binomial(link="logit"))
+summary(tick_1)
+Anova(tick_1)
+exp(coef(tick_1))
+exp(confint(tick_1))
+
+## Animal Movements 
+# Wild animals contact  # Signiifant
+table(cattle_study$contact_of_domestic_animal_with_wild, cattle_study$leptospirosis)
+cattle_study$contact_of_domestic_animal_with_wild<-as.factor(cattle_study$contact_of_domestic_animal_with_wild)
+contact_1<- glm (leptospirosis ~ contact_of_domestic_animal_with_wild,  data= cattle_study, family= binomial(link="logit"))
+summary(contact_1)
+Anova(contact_1)
+exp(coef(contact_1))
+exp(confint(contact_1))
+
+## common_grazing_field_for_cattle_and_other_domestic_species # Signiifant
+table(cattle_study$common_grazing_ground, cattle_study$leptospirosis)
+cattle_study$common_grazing_ground<-as.factor(cattle_study$common_grazing_field_for_cattle_and_other_domestic_species)
+common_grazing_1<- glm (leptospirosis ~ common_grazing_ground,  data= cattle_study, family= binomial(link="logit"))
+summary(common_grazing_1)
+Anova(common_grazing_1)
+exp(coef(common_grazing_1))
+exp(confint(common_grazing_1))
+
+# Grazing cattle on pasture with comunity dog access # Signiifant
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+table(cattle_study$grazing_in_community_dog_access, cattle_study$leptospirosis)
+cattle_study$grazing_in_community_dog_access<-as.factor(cattle_study$grazing_in_community_dog_access)
+
+community_dog_1<- glm (leptospirosis ~ grazing_in_community_dog_access,  data= cattle_study, family= binomial(link="logit"))
+summary(community_dog_1)
+Anova(community_dog_1)
+exp(coef(community_dog_1))
+exp(confint(community_dog_1))
+
+
+
+## Multivariable regression
+
+library(car)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+cattle_study$lactation_vs_non_lactating<-as.factor(cattle_study$lactation_vs_non_lactating)
+
+## Since sex_cat has limited  male levesl, it gives "contrasts can be applied only to factors with 2 or more levels".So it is droped.
+FullModel_lepto_1<-glm (leptospirosis ~ age_cat + breed + BCS_cat+  pregnanancy_status_of_female +
+ history_of_anestrous_in_female +grazing_in_community_dog_access_codes+ lactation_vs_non_lactating + tick_infestation,data = cattle_study, na.action = na.omit,
+family = binomial(link = "logit"))
+summary(FullModel_lepto_1)
+Model_1<-step(FullModel_lepto_1,direction="backward")
+summary(Model_1)
+Anova(Model_1,type=3)
+exp(coef(Model_1))
+exp(confint(Model_1))
+
+
+#  parity_cat is highly correltae with age_cat and common_grazing_ground is highly correlated with comminity dog acess to pasture.So, parity_cat  and correlated with comminity dog acess to pasture is dropped.
+
+# Note when the variables that are significant at univariables are not significant at multivaribel regression that may be due to correlation
+# with other variables or small samples size.
+# By step wise AIC subset selection methods by Mumin approach
+options(na.action = "na.fail")
+library(MuMIn)
+AllSubsets_2<-dredge(FullModel_lepto_1,rank="AIC")
+head(AllSubsets_2)
+
+
+## Alternative mathods (to remove +e att odds ratio dont relevel the variables)
+cattle_study$age_cat_codes<-as.factor(cattle_study$age_cat_codes)
+cattle_study$sex_cat_codes<-as.factor(cattle_study$sex_cat_codes)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+cattle_study$grazing_in_community_dog_access_codes<-as.factor(cattle_study$grazing_in_community_dog_access_codes)
+cattle_study$sex_cat<-as.factor(cattle_study$sex_cat)
+cattle_study$leptospirosis<-as.factor(cattle_study$leptospirosis)
+Model_lepto<- glm (leptospirosis ~ age_cat + lactation_vs_non_lactating + grazing_in_community_dog_access_codes,data = cattle_study,na.action = na.omit, family = binomial(link = "logit"))
+summary(Model_lepto)
+Anova(Model_lepto,type = 3)
+anova(Model_lepto)
+exp(coef(Model_lepto))
+exp(confint(Model_lepto))
+
+# Comapring models
+library(faraway)
+anova(Model_1,Model_lepto, test = "Chisq")
+par(mfrow=c(2,2))
+plot(Model_1)
+vif(Model_1)
+
+
+## Hoslem and Lemeshow model fit tes (H-L test)
+library(ResourceSelection)
+hoslem.test(Model_1$y, fitted(Model_lepto),g=10)
