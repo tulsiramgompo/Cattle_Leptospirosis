@@ -1,0 +1,215 @@
+getwd()
+
+setwd("/Users/Tulsigompo/Documents/Presentaion_Dr_Gompo/Rupandehi_study_data")
+library(readr)
+library(ggplot2)
+library(ggthemes)
+cattle_herd_study<-read_csv("/Users/Tulsigompo/Documents/Presentaion_Dr_Gompo/Rupandehi_study_data/Farm_data_final_herd_level_1.csv")
+head(cattle_herd_study)
+tail(cattle_herd_study)
+str(cattle_herd_study)
+
+## herd information
+mean(cattle_herd_study $herd_size, na.rm = TRUE)
+median(cattle_herd_study $herd_size, na.rm = TRUE)
+range(cattle_herd_study $herd_size, na.rm = TRUE)
+hist(cattle_herd_study$herd_size)
+
+
+## Univariable Analysis
+library(car)
+
+
+#cattle origin #Bi=oderline significant and include in  the final model
+table(cattle_herd_study$cattle_origin,cattle_herd_study$leptospirosis) 
+cattle_herd_study$cattle_origin<-as.factor(cattle_herd_study$cattle_origin)
+cattle_herd_study$leptospirosis<-as.factor(cattle_herd_study$leptospirosis)
+cattle_origin_herd<- glm (leptospirosis ~ cattle_origin,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(cattle_origin_herd)
+anova(cattle_origin_herd)
+Anova(cattle_origin_herd, type= 3)
+exp(coef(cattle_origin_herd))
+exp(confint(cattle_origin_herd))
+
+## Herd Size  # Highly significant
+table(cattle_herd_study$herd_size_cat, cattle_herd_study$leptospirosis)
+cattle_herd_study$herd_size_cat<-as.factor(cattle_herd_study$herd_size_cat)
+cattle_herd_study$leptospirosis<-as.factor(cattle_herd_study$leptospirosis)
+cattle_herd_study$herd_size_cat<-relevel(cattle_herd_study$herd_size_cat,ref="equal_or_below_10")
+Herd_size_1<- glm (leptospirosis ~ herd_size_cat,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(Herd_size_1)
+anova(Herd_size_1)
+Anova(Herd_size_1)
+exp(coef(Herd_size_1))
+exp(confint(Herd_size_1))
+
+# Herd structure # Not signiicant but include in model
+table(cattle_herd_study$herd_structure,cattle_herd_study$leptospirosis) ## Note it
+cattle_herd_study$leptospirosis<-as.factor(cattle_herd_study$leptospirosis)
+cattle_herd_study$herd_structure<-as.factor (cattle_herd_study$herd_structure)
+cattle_herd_study$herd_structure<-relevel(cattle_herd_study $ herd_structure, ref ="single")
+
+herd_structure_1<- glm (leptospirosis ~ herd_structure,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(herd_structure_1)
+Anova(herd_structure_1)
+exp(coef(herd_structure_1))
+exp(confint(herd_structure_1))
+
+# Bedding type # Not significat and remove in final model
+table(cattle_herd_study$bedding_type,cattle_herd_study$leptospirosis) 
+cattle_herd_study$bedding_type<-as.factor(cattle_herd_study$bedding_type)
+cattle_herd_study$bedding_type<-relevel(cattle_herd_study $ bedding_type, ref ="none")
+bedding_type_1<- glm (leptospirosis ~ bedding_type,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(bedding_type_1)
+Anova(bedding_type_1, type=3)
+exp(coef(bedding_type_1))
+exp(confint(bedding_type_1))
+
+# Source of water # Not significat and remove in final model
+
+table(cattle_herd_study$water_source, cattle_herd_study$leptospirosis) #
+cattle_herd_study$water_source<-as.factor(cattle_herd_study$water_source)
+cattle_herd_study$water_source<-relevel(cattle_herd_study$water_source, ref="well")
+water_source_1<- glm (leptospirosis ~ water_source,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(water_source_1)
+Anova(water_source_1)
+exp(coef(water_source_1))
+exp(confint(water_source_1))
+
+## Feeding type  Not significat and remove in final model
+table(cattle_herd_study$feeding_type, cattle_herd_study$leptospirosis) #
+cattle_herd_study$feeding_type<-as.factor(cattle_herd_study$feeding_type)
+cattle_herd_study$feeding_type<-relevel(cattle_herd_study$feeding_type, ref="stall feeding")
+grazing_type_1<- glm (leptospirosis ~ feeding_type,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(grazing_type_1)
+Anova(grazing_type_1)
+exp(coef(grazing_type_1))
+exp(confint(grazing_type_1))
+
+
+# Breeding type # Not significant and remove in final model
+table(cattle_herd_study$breeding_type, cattle_herd_study$leptospirosis) #
+cattle_herd_study$breeding_type<-as.factor(cattle_herd_study$breeding_type)
+cattle_herd_study$breeding_type<-relevel(cattle_herd_study$breeding_type, ref="natural mating")
+breeding_type_1<- glm (leptospirosis ~ breeding_type,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(breeding_type_1)
+Anova(breeding_type_1)
+exp(coef(breeding_type_1))
+exp(confint(breeding_type_1))
+
+
+#Seperarte calving pen# Not significant and remove in final model
+table(cattle_herd_study$separate_calving_pen,cattle_herd_study$leptospirosis) ##
+cattle_herd_study$separate_calving_pen<-as.factor(cattle_herd_study$separate_calving_pen)
+cattle_herd_study$separate_calving_pen<-relevel(cattle_herd_study$separate_calving_pen, ref="yes")
+separate_calving_1<- glm (leptospirosis ~ separate_calving_pen,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(separate_calving_1)
+Anova(separate_calving_1)
+exp(coef(separate_calving_1))
+exp(confint(separate_calving_1))
+
+
+# Cat faeces  # Not significant and remove in final model
+table(cattle_herd_study$cat_feces_seen_in_farm, cattle_herd_study$leptospirosis)
+cattle_herd_study$ leptospirosis<-as.factor (cattle_herd_study$leptospirosis)
+cattle_herd_study$ cat_feces_seen_in_farm<- as.factor(cattle_herd_study$cat_feces_seen_in_farm)
+cattle_herd_study$cat_feces_seen_in_farm <- relevel(cattle_herd_study$cat_feces_seen_in_farm, ref="no")
+cat_feces_1<- glm (leptospirosis ~ cat_feces_seen_in_farm,  data = cattle_herd_study, family= binomial(link="logit"))
+summary(cat_feces_1)
+Anova(cat_feces_1)
+exp(coef(cat_feces_1))
+exp(confint(cat_feces_1))
+
+## Feed contamination soils Not significant but incude final model
+table(cattle_herd_study$feed_contamination_with_soil, cattle_herd_study$leptospirosis) ### Important
+cattle_herd_study$feed_contamination_with_soil<-as.factor(cattle_herd_study$feed_contamination_with_soil)
+cattle_herd_study$feed_contamination_with_soil<-relevel(cattle_herd_study$feed_contamination_with_soil, ref="no")
+feed_contamination_1<- glm (leptospirosis ~ feed_contamination_with_soil,  data= cattle_herd_study, family= binomial(link="logit"))
+summary(feed_contamination_1)
+Anova(feed_contamination_1)
+exp(coef(feed_contamination_1))
+exp(confint(feed_contamination_1))
+
+
+## Rodents seen around  farms		#	Not significant but incude final model							
+table(cattle_herd_study$rodents_in_kitchen_and_farm, cattle_herd_study$leptospirosis) 
+cattle_herd_study$rodents_in_kitchen_and_farm<-as.factor(cattle_herd_study$rodents_in_kitchen_and_farm) 
+rodents_in_kitchen_1<- glm (leptospirosis ~ rodents_in_kitchen_and_farm,data= cattle_herd_study, family= binomial(link="logit"))
+summary(rodents_in_kitchen_1)
+Anova(rodents_in_kitchen_1)
+exp(coef(rodents_in_kitchen_1))
+exp(confint(rodents_in_kitchen_1))	
+
+
+## Owners work with bare foot 	#	Not significant but incude final model
+table(cattle_herd_study$work_bare_feet_in_rice_fields, cattle_herd_study$leptospirosis)  ## important
+cattle_herd_study$work_bare_feet_in_rice_fields<-as.factor(cattle_herd_study$work_bare_feet_in_rice_fields)
+cattle_herd_study$work_bare_feet_in_rice_fields<-relevel(cattle_herd_study$work_bare_feet_in_rice_fields, ref="no")
+work_with_bare_feet_1<- glm(leptospirosis ~ work_bare_feet_in_rice_fields, data= cattle_herd_study, family= binomial(link="logit"))
+summary(work_with_bare_feet_1)
+Anova(work_with_bare_feet_1)
+exp(coef(work_with_bare_feet_1))
+exp(confint(work_with_bare_feet_1))
+
+
+# Correlation Analysis
+
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(corrplot)
+
+
+
+
+
+# Multivariable regression Analysis
+library(car)
+cattle_herd_study$leptospirosis<-as.factor(cattle_herd_study$leptospirosis)
+
+FullModel_1<-glm(leptospirosis~cattle_origin+herd_size_cat+herd_structure+bedding_type+water_source+ water_purification_system +feeding_type+breeding_type+separate_calving_pen+
+                 grazing_pasture_access_community_dog+cat_feces_seen_in_farm+feed_contamination_with_soil+rodents_in_kitchen_and_farm+work_bare_feet_in_rice_fields, data = cattle_herd_study, 
+               family = binomial(link = "logit"))
+summary(FullModel_1)
+Model_1<-step(FullModel_1,direction="backward")
+summary(Model_1)
+Anova(Model_1,type=3)
+exp(coef(Model_1))
+exp(confint(Model_1))
+
+# By step wise AIC subset selection
+options(na.action = "na.fail")
+library(MuMIn)
+AllSubsets_1<-dredge(FullModel_1,rank="AIC")
+head(AllSubsets_1)
+
+
+## Alternative mathods (to remove +e att odds ratio dont relevel the variables)
+
+Model_II<- glm (leptospirosis ~ cattle_origin+herd_size_cat+herd_structure+ feed_contamination_with_soil + rodents_in_kitchen_and_farm+work_bare_feet_in_rice_fields, data = cattle_herd_study,family = binomial(link="logit"))
+summary(Model_II)
+Model_2<-step(Model_II,direction="backward")
+summary(Model_2)
+Anova(Model_2,type = 3)
+exp(coef(Model_2))
+exp(confint(Model_2))
+# # Checking for the multicollinearity
+## Mlticollinearity occurs when two or more independent variables are highly correlated with one another in a regression model.
+## VIF is preferred as it can show the correlation of a variable with a group of other variables.
+par(mfrow=c(2,2))
+plot(Model_II)
+vif(Model_II)
+
+## Examine FIt by MacFadden's pseudo R2' (can be generally is used for gropued data)
+
+NullModel_1<-glm(leptospirosis~1,data= cattle_herd_study,na.action=na.exclude,family = binomial(link="logit"))
+
+## Pseudo R2
+1-logLik(NullModel_1)/logLik(NullModel_1) 
+
+
+
+# Model Tests and interpretation
+# H-L Lack of fit  Test
+library(ResourceSelection)
+hoslem.test(Model_II$y,fitted(Model_II),g=10)
