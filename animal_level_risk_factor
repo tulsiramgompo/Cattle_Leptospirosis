@@ -375,3 +375,5 @@ vif(Model_1)
 ## Hoslem and Lemeshow model fit tes (H-L test)
 library(ResourceSelection)
 hoslem.test(Model_1$y, fitted(Model_lepto),g=10)
+##Later on we decieded to move our analysis to the random mixed effect model to account for the clustering of animal level factors  at different herd level factors.The code are bit update
+on the previous one for the creation of mixed effect logistic regression.
